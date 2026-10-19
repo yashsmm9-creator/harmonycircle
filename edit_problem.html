@@ -1,0 +1,48 @@
+{% extends 'base.html' %}{% block title %}Update problem{% endblock %}{% block content %}
+<section class="form-page">
+  <a class="back-link" href="{{ url_for('problem_detail', problem_id=problem.id) }}">← Back to problem</a>
+  <div class="eyebrow">KEEP THE COMMUNITY UPDATED</div>
+  <h1>Update the <em>status</em> and attachments.</h1>
+  <p class="form-intro">Only the person who created this post can change its status and manage attachments.</p>
+  <form method="post" enctype="multipart/form-data" class="problem-form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <div class="field-grid">
+      <label class="field-wide">Problem / event
+        <select name="status" required>
+          {% for st in ['Open','In Progress','Help Needed','Resolved','Closed'] %}
+            <option value="{{ st }}" {% if problem.status==st %}selected{% endif %}>{{ st }}</option>
+          {% endfor %}
+        </select>
+        <small class="field-hint">Open: help needed. In Progress: work ongoing. Help Needed: extra assistance required. Resolved: issue solved. Closed: no longer active.</small>
+      </label>
+    </div>
+    <h3>Current attachments</h3>
+    {% if attachments %}
+      <ul class="attachment-list">
+        {% for a in attachments %}
+          <li>
+            {% if a.mime_type.startswith('image/') %}
+              <img src="{{ url_for('download_upload', filename=a.filename) }}" alt="{{ a.original_name }}" style="max-width:150px;">
+            {% else %}
+              <a href="{{ url_for('download_upload', filename=a.filename) }}">{{ a.original_name }}</a>
+            {% endif %}
+            <label><input type="checkbox" name="remove_attachment" value="{{ a.id }}"> Remove</label>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No attachments yet.</p>
+    {% endif %}
+    <h3>Add new attachments</h3>
+    <label class="upload-box">
+      <span class="upload-icon">▤</span>
+      <span><b data-file-label>Choose files (images or PDFs)</b><small>Optional · up to 8 MB each</small></span>
+      <input type="file" name="attachments" multiple accept="image/*,application/pdf">
+    </label>
+    <div class="form-actions">
+      <a class="button button-quiet" href="{{ url_for('problem_detail', problem_id=problem.id) }}">Cancel</a>
+      <button class="button button-primary" type="submit">Save changes ↗</button>
+    </div>
+  </form>
+</section>
+{% endblock %}
